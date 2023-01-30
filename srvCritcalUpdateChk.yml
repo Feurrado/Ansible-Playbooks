@@ -1,0 +1,31 @@
+- name: Check for critical updates
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+
+    - name: Check for security updates
+      apt:
+        upgrade: security
+      register: result
+
+    - name: Display result
+      debug:
+        var: result.stdout_lines
+
+    - name: Notify about critical updates
+      message: "Critical updates are available on {{ ansible_hostname }}."
+      when: result.stdout_lines is defined and result.stdout_lines|length > 0
+
+      #this playbook:
+
+      # Update package cache - Updates the package cache on the server.
+      # Check for security updates - Checks for security updates using the apt module and stores the result in the result variable.
+      # Display result - Displays the result of the security update check using the debug module.
+      # Notify about critical updates - Sends a message about critical updates being available on the server. 
+      # -> The message includes the hostname of the server and is sent only if there are critical updates available (as determined by the when clause).
+
+      # The playbook is run on all hosts defined in the hosts section and requires elevated privileges, as specified by the become: yes directive.
+      
